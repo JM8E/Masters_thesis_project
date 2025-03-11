@@ -1,5 +1,7 @@
 Annotates (Tilletia) genomes using Augustus (container) - to use on other species, check for appropriate --species=
+
 Run from inside directory containing the genome assemblies
+
 Creates output files in output directory called augustus
 
 ```
