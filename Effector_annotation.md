@@ -14,3 +14,21 @@ do signalp6 --fastafile ${f} --organism eukarya --output_dir ../effector_annotat
   deeploc2 --fasta ../effector_annotation/${f}_/${f}_effectors.fasta --output ../effector_annotation/${f}_/${f/.aa/_effectors_deeploc};
 done
 ```
+# Get count of effectors
+gives you total effectors, apoplastic and cytoplasmic effectors
+```{r}
+for file in *effectorp; 
+do 
+echo $file >> count_effectors.txt; 
+cat $file | grep 'Number of' >> effectorp/count_effectors.txt; 
+done
+```
+
+# Count signal peptides
+```{r}
+for dir in ls *.aa_; 
+do 
+echo ${dir//.aa_/ } >> count_signalp.txt; 
+grep ^\> ${dir}/signalp/processed_entries.fasta | wc -l >> count_signalp.txt; 
+done
+```
