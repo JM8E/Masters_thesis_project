@@ -17,13 +17,46 @@ done
 # Get count of effectors
 gives you total effectors, apoplastic and cytoplasmic effectors
 ```{r}
+# first move all effectorp output to one directory
 for file in *effectorp; 
 do 
 echo $file >> count_effectors.txt; 
 cat $file | grep 'Number of' >> effectorp/count_effectors.txt; 
 done
 ```
+# Figures
+In R Studio
 
+Put all effector (and CAZyme) prediction values in excel - columns with total effectors, cytoplasmic, apoplastic, both effector and CAZyme, CAZymes - gene_pred - load into R Studio
+```{r}
+library(tidyverse)
+# numbers of cols depend on how you wrote them into excel - change to fit your situation
+addnew_cyt <- cbind(gene_pred[3], gene_pred[5], gene_pred[6])
+addnew_apo <- cbind(gene_pred[4], gene_pred[5], gene_pred[6])
+addnew_cyt <- addnew_cyt %>% add_column(Type = "Cytoplasmic effectors")
+addnew_apo <- addnew_apo %>% add_column(Type = "Apoplastic effectors")
+addnew_apo <- rename(addnew_apo, Number_of_effectors = 'Apoplastic effectors')
+addnew_cyt <- rename(addnew_cyt, Number_of_effectors = 'Cytoplasmic effectors')
+addnew_eff <- rbind(addnew_apo,addnew_cyt)
+
+# stacked bar plot with effectors divided into cytoplasmic and apoplastic
+#pdf("effectors.pdf")
+addnew_eff %>% mutate(addnew_eff, Type = factor(Type, levels=c("Apoplastic effectors", "Cytoplasmic effectors"))) %>% mutate(addnew_eff, Species=factor(Species,levels=c("T.controversa", "T.caries", "T.laevis", "T.bromi", "T.goloskokovii", "T.fusca", "T.walkeri", "T.indica", "T.rugispora", "T.horrida", "T.setariae", "U.maydis"))) %>% ggplot(aes(fill = Type, x = Assembly, y = Number_of_effectors)) + scale_y_continuous(expand = c(0, 0), limits = c(0, 450)) + ggtitle("Predicted apoplastic and \n cytoplasmic effectors") + theme(plot.title = element_text(hjust = 0.5)) +
+ geom_bar(position = "stack", stat = "identity") + scale_fill_manual(values = c("darkmagenta","darkcyan")) + theme(axis.text.x = element_text(angle=90, vjust = 0.5, hjust=1)) + facet_grid(~ Species, switch = "x", space = "free_x", scales = "free_x") + theme(strip.text.x = element_text(angle=90, hjust=1), strip.placement = "outside",
+        strip.background = element_rect(fill = c("honeydew"), color = "grey"),
+        panel.spacing = unit(-.01,"cm")) 
+#dev.off()
+
+# -II- but in percentages
+#pdf("effplot_perc1.pdf")
+addnew_eff %>% 
+ ggplot(aes(fill = Type, x = Assembly, y = Number_of_effectors)) + 
+ geom_bar(position = "fill", stat = "identity") + ylab("Percentage of effectors") + scale_fill_manual(values = c("olivedrab", "turquoise3")) + theme(plot.margin = unit(c(1,1,1,1), "cm")) + theme(axis.title.y=element_text(hjust=0.8)) + scale_y_continuous(labels = scales::percent) + theme(axis.text.x = element_text(angle=90, vjust = 0.5, hjust=1)) + facet_grid(~ Species, switch = "x", space = "free_x", scales = "free_x") + theme(strip.text.x = element_text(angle=90, hjust=1), strip.placement = "outside",
+        strip.background = element_rect(fill = c("honeydew"), color = "grey"),
+        panel.spacing = unit(-.01,"cm")) #scale_x_discrete(limits=c("DAOMC238035","DAOMC238055","TC-1-MSG-1","DAOMC238032","FC","IC","ATCC42080","DAOMC238038","OA2","DAOMC236426","GC","CBS122995","CBS122992","DAOMC238041","DAOMC238049","DAOMC236422","PSWKBGH_1_1","PSWKBGH_1_2","DAOMC238030","QB-1","TX6","WJ-1","Umaydis")) 
+#dev.off()
+
+```
 # Count signal peptides
 ```{r}
 for dir in ls *.aa_; 
